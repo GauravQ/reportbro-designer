@@ -11,6 +11,7 @@ export default class BarCodeElement extends DocElement {
         this.content = '';
         this.format = 'CODE128';
         this.displayValue = true;
+        this.userEditable = false;
         this.spreadsheet_hide = false;
         this.spreadsheet_column = '';
         this.spreadsheet_colspan = '';
@@ -43,7 +44,7 @@ export default class BarCodeElement extends DocElement {
      * @returns {String[]}
      */
     getProperties() {
-        return ['x', 'y', 'height', 'content', 'format', 'displayValue',
+        return ['x', 'y', 'height', 'content', 'format', 'displayValue', 'userEditable',
             'printIf', 'removeEmptyElement',
             'spreadsheet_hide', 'spreadsheet_column', 'spreadsheet_colspan', 'spreadsheet_addEmptyRow'];
     }

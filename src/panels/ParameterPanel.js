@@ -25,6 +25,10 @@ export default class ParameterPanel extends PanelBase {
                 'type': SetValueCmd.type.select,
                 'fieldId': 'array_item_type'
             },
+            'userEditable': {
+                'type': SetValueCmd.type.checkbox,
+                'fieldId': 'user_editable'
+            },
             'eval': {
                 'type': SetValueCmd.type.checkbox,
                 'fieldId': 'eval'
@@ -147,6 +151,26 @@ export default class ParameterPanel extends PanelBase {
                     }
                 });
             elFormField.append(elEval);
+            elDiv.append(elFormField);
+            panel.append(elDiv);
+
+        }
+        
+        if (this.rb.getProperty('adminMode') || this.rb.getProperty('showDisabledToNonAdmin')) {            
+            elDiv = $('<div class="rbroFormRow" id="rbro_parameter_user_editable_row"></div>');
+            elDiv.append(`<label for="rbro_parameter_user_editable">${this.rb.getLabel('parameterUserEditable')}:</label>`);
+            elFormField = $('<div class="rbroFormField"></div>');
+            let elUserEditable = $('<input id="rbro_parameter_user_editable" type="checkbox">')
+                .change(event => {
+                    let selectedObject = this.rb.getSelectedObject();
+                    if (selectedObject !== null) {
+                        let cmd = new SetValueCmd(
+                            selectedObject.getId(), 'userEditable', elUserEditable.is(":checked"),
+                            SetValueCmd.type.checkbox, this.rb);
+                        this.rb.executeCommand(cmd);
+                    }
+                });
+            elFormField.append(elUserEditable);
             elDiv.append(elFormField);
             panel.append(elDiv);
         }
@@ -294,6 +318,7 @@ export default class ParameterPanel extends PanelBase {
             $('#rbro_parameter_name').prop('disabled', !editable);
             $('#rbro_parameter_type').prop('disabled', !editable);
             $('#rbro_parameter_eval').prop('disabled', !editable);
+            $('#rbro_parameter_user_editable').prop('disabled', !editable);
             $('#rbro_parameter_nullable').prop('disabled', !editable);
             $('#rbro_parameter_pattern').prop('disabled', !editable);
             $('#rbro_parameter_expression').prop('disabled', !editable);
@@ -301,6 +326,7 @@ export default class ParameterPanel extends PanelBase {
                 $('#rbro_parameter_name_row label').removeClass('rbroDisabled');
                 $('#rbro_parameter_type_row label').removeClass('rbroDisabled');
                 $('#rbro_parameter_eval_row label').removeClass('rbroDisabled');
+                $('#rbro_parameter_user_editable_row label').removeClass('rbroDisabled');
                 $('#rbro_parameter_nullable_row label').removeClass('rbroDisabled');
                 $('#rbro_parameter_pattern_row label').removeClass('rbroDisabled');
                 $('#rbro_parameter_expression_row label').removeClass('rbroDisabled');
@@ -308,6 +334,7 @@ export default class ParameterPanel extends PanelBase {
                 $('#rbro_parameter_name_row label').addClass('rbroDisabled');
                 $('#rbro_parameter_type_row label').addClass('rbroDisabled');
                 $('#rbro_parameter_eval_row label').addClass('rbroDisabled');
+                $('#rbro_parameter_user_editable_row label').addClass('rbroDisabled');
                 $('#rbro_parameter_nullable_row label').addClass('rbroDisabled');
                 $('#rbro_parameter_pattern_row label').addClass('rbroDisabled');
                 $('#rbro_parameter_expression_row label').addClass('rbroDisabled');

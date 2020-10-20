@@ -1307,3 +1307,10 @@ button.rbroMenuButton[disabled], button.rbroMenuButton[disabled]:hover,
 .rbroColorContainer .sp-palette .sp-thumb-dark.sp-thumb-active .sp-thumb-inner{
     background-image: none;
 }
+
+.rbroDocumentPanelLeft {
+    width: calc(100% - 390px) !important;
+}
+.rbroDetailPanelLeft {
+    left: 0px !important;
+}

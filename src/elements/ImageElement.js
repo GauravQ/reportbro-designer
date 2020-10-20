@@ -21,6 +21,7 @@ export default class ImageElement extends DocElement {
         this.verticalAlignment = Style.alignment.top;
         this.backgroundColor = '';
         this.link = '';
+        this.userEditable = false;
         this.spreadsheet_hide = false;
         this.spreadsheet_column = '';
         this.spreadsheet_addEmptyRow = false;
@@ -52,7 +53,7 @@ export default class ImageElement extends DocElement {
      * @returns {String[]}
      */
     getProperties() {
-        return ['x', 'y', 'width', 'height', 'source', 'image', 'imageFilename',
+        return ['x', 'y', 'width', 'height', 'source', 'image', 'imageFilename', 'userEditable',
             'horizontalAlignment', 'verticalAlignment', 'backgroundColor',
             'printIf', 'removeEmptyElement', 'link',
             'spreadsheet_hide', 'spreadsheet_column', 'spreadsheet_addEmptyRow'];

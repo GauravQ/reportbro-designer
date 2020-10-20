@@ -23,6 +23,7 @@ export default class Parameter {
         this.nullable = false;
         this.pattern = '';
         this.expression = '';
+        this.userEditable = false;
         this.testData = '';
         this.children = [];
         this.editable = rb.getProperty('adminMode');
@@ -74,7 +75,7 @@ export default class Parameter {
      * @returns {String[]}
      */
     getFields() {
-        return ['id', 'name', 'type', 'arrayItemType', 'eval', 'nullable', 'pattern',
+        return ['id', 'name', 'type', 'arrayItemType', 'userEditable', 'eval', 'nullable', 'pattern',
             'expression', 'showOnlyNameType', 'testData'];
     }
 

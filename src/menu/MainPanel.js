@@ -29,7 +29,7 @@ export default class MainPanel {
 
         this.stylesItem = new MainPanelItem(
             'style', null, styleContainer,
-            { hasChildren: true, showAdd: true, showDelete: false, hasDetails: false }, rb);
+            { hasChildren: true, showAdd: rb.getProperty('adminMode'), showDelete: false, hasDetails: false }, rb);
         
         this.documentPropertiesItem = new MainPanelItem(
             'documentProperties', null, rb.getDocumentProperties(), { showDelete: false, hasDetails: true }, rb);
@@ -39,9 +39,11 @@ export default class MainPanel {
             this.documentItem,
             this.footerItem,
             this.parametersItem,
-            this.stylesItem,
-            this.documentPropertiesItem
+            this.stylesItem
         ];
+        if(!this.rb.getProperty('documentSettingsInMenu')){
+            this.documentPropertiesItem
+        }
 
         this.dragMainPanelSizer = false;
         this.dragMainPanelSizerStartX = 0;

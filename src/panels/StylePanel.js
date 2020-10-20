@@ -184,7 +184,7 @@ export default class StylePanel extends PanelBase {
     static renderStyle(elPanel, idPrefix, fieldPrefix, renderDocElementMainStyle, rb) {
         let elDiv, elFormField;
         elDiv = $(`<div id="rbro_${idPrefix}textstyle_row" class="rbroFormRow"></div>`);
-        elDiv.append(`<label>${rb.getLabel('styleTextStyle')}:</label>`);
+        elDiv.append(`<label for="rbro_${idPrefix}bold" >${rb.getLabel('styleTextStyle')}:</label>`);
         elFormField = $('<div class="rbroFormField"></div>');
         let elTextStyle = $(`<div id="rbro_${idPrefix}textstyle"></div>`);
         let elBold = $(
@@ -308,7 +308,7 @@ export default class StylePanel extends PanelBase {
         elPanel.append(elDiv);
 
         elDiv = $(`<div id="rbro_${idPrefix}alignment_row" class="rbroFormRow"></div>`);
-        elDiv.append(`<label>${rb.getLabel('styleAlignment')}:</label>`);
+        elDiv.append(`<label for="rbro_${idPrefix}halignment">${rb.getLabel('styleAlignment')}:</label>`);
         elFormField = $('<div class="rbroFormField"></div>');
         let elHAlignment = $(`<div id="rbro_${idPrefix}halignment"></div>`);
         let elHAlignmentLeft = $(
@@ -832,7 +832,7 @@ export default class StylePanel extends PanelBase {
 
         let elBorderDiv = $(`<div id="rbro_${idPrefix}border_div"></div>`);
         elDiv = $(`<div id="rbro_${idPrefix}border_row" class="rbroFormRow"></div>`);
-        elDiv.append(`<label>${rb.getLabel('styleBorder')}:</label>`);
+        elDiv.append(`<label for="rbro_${idPrefix}border_all">${rb.getLabel('styleBorder')}:</label>`);
         elFormField = $('<div class="rbroFormField"></div>');
         let elBorderStyle = $(`<div id="rbro_${idPrefix}border"></div>`);
         let elBorderAll = $(
@@ -1257,7 +1257,7 @@ export default class StylePanel extends PanelBase {
 
 
         elDiv = $(`<div id="rbro_${idPrefix}padding_row" class="rbroFormRow"></div>`);
-        elDiv.append(`<label for="rbro_${idPrefix}padding">${rb.getLabel('stylePadding')}:</label>`);
+        elDiv.append(`<label for="rbro_${idPrefix}padding_top">${rb.getLabel('stylePadding')}:</label>`);
         elFormField = $('<div class="rbroFormField rbroSmallInput"></div>');
 
         let elPaddingTopDiv = $('<div class="rbroColumnCenter"></div>');
@@ -1402,6 +1402,7 @@ export default class StylePanel extends PanelBase {
      */
     updateDisplay(field) {
         let selectedObject = this.rb.getSelectedObject();
+        let editable = this.rb.getProperty('adminMode') || !this.rb.getProperty('showDisabledToNonAdmin');
 
         if (selectedObject !== null && selectedObject instanceof Style) {
             for (let property in this.propertyDescriptors) {
@@ -1409,6 +1410,7 @@ export default class StylePanel extends PanelBase {
                     let propertyDescriptor = this.propertyDescriptors[property];
                     let value = selectedObject.getValue(property);
                     super.setValue(propertyDescriptor, value, false);
+                    super.setDisable(propertyDescriptor, !editable);
                 }
             }
         }

@@ -77,7 +77,7 @@ export default class AddDeleteDocElementCmd extends Command {
 
     static createElement(id, data, elementType, panelPos, openPanelItem, rb) {
         let element;
-        let properties = { draggable: true };
+        let properties = { draggable: true, showDelete: rb.getProperty('adminMode')  };
         if (elementType === DocElement.type.text) {
             element = new TextElement(id, data, rb);
         } else if (elementType === DocElement.type.line) {

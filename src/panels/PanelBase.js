@@ -28,6 +28,26 @@ export default class PanelBase {
      */
     destroy() {
     }
+    
+    setDisable(propertyDescriptor, disabled = false) {
+        let propertyId = `#${this.idPrefix}_${propertyDescriptor['fieldId']}`;    
+        let propertyName = `${this.idPrefix}_${propertyDescriptor['fieldId']}`;   
+
+
+        if(propertyDescriptor['type'] === SetValueCmd.type.buttonGroup) {
+            $(propertyId).find(`button`).prop('disabled', disabled);
+        }else if(propertyDescriptor['type'] === SetValueCmd.type.color && disabled) {
+            $(propertyId).parent().css('pointer-events','none');
+        }else{   
+            $(propertyId).prop('disabled', disabled);
+        }
+            
+        if(disabled){
+            $('label[for='+ propertyName  +']').addClass('rbroDisabled');
+        }else{
+            $('label[for='+ propertyName  +']').removeClass('rbroDisabled');
+        }
+    }
 
     setValue(propertyDescriptor, value, differentValues) {
         let propertyId = `#${this.idPrefix}_${propertyDescriptor['fieldId']}`;
@@ -110,6 +130,7 @@ export default class PanelBase {
     hide() {
         $('#' + this.panelId).addClass('rbroHidden');
     }
+    
 
     /**
      * Is called when a data object was modified (including new and deleted data objects).

@@ -13,11 +13,54 @@ export default class MenuPanel {
         this.rb = rb;
     }
 
+    toggleMenuPanel(){        
+        if ($('#rbro_menu_toggle').children()[0].classList.contains('rbroIcon-arrow-left')) {
+            $('#rbro_menu_toggle').children()[0].classList.replace('rbroIcon-arrow-left', 'rbroIcon-arrow-right');
+
+
+            $('.rbroDocumentPanel').addClass('rbroDocumentPanelLeft');
+            $('.rbroDetailPanel').addClass('rbroDetailPanelLeft');
+            $('.rbroMainPanel').hide();
+            $('.rbroMainPanelSizer').hide();
+
+
+        } else {
+            $('#rbro_menu_toggle').children()[0].classList.replace('rbroIcon-arrow-right', 'rbroIcon-arrow-left');
+
+            $('.rbroDocumentPanel').removeClass('rbroDocumentPanelLeft');
+            $('.rbroDetailPanel').removeClass('rbroDetailPanelLeft');
+            $('.rbroMainPanel').show();
+            $('.rbroMainPanelSizer').show();
+        }
+    }
+
     render() {
         let menuShowButtonLabels = this.rb.getProperty('menuShowButtonLabels');
         let menuButtonClass = menuShowButtonLabels ? '' : 'rbroHidden';
         let panel = $('#rbro_menu_panel');
         let panelLeft = $('<div class="rbroToolButtonContainer"></div>');
+        if (this.rb.getProperty('showMenuToggle')) {
+            panelLeft.append($(`<button id="rbro_menu_toggle" class="rbroButton rbroMenuButton" title="${this.rb.getLabel('menuToggleMenuTip')}">
+                    <span class="rbroIcon-arrow-left"></span><span class="${menuButtonClass}">${this.rb.getLabel('menuToggleMenu')}</span></button>`)
+                .click(event => {
+                    this.toggleMenuPanel();
+                })
+            );
+        }
+        if (this.rb.getProperty('documentSettingsInMenu') && ( this.rb.getProperty('adminMode') || this.rb.getProperty('showDisabledToNonAdmin'))) {
+            panelLeft.append($(`<button id="rbro_menu_setting" class="rbroButton rbroMenuButton" title="${this.rb.getLabel('menuSettingTip')}">
+                    <span class="rbroIcon-settings"></span><span class="${menuButtonClass}">${this.rb.getLabel('menuSave')}</span></button>`)
+                .click(event => {
+                    if (!this.rb.isSelectedObject('0_document_properties')) {
+                        this.rb.selectObject('0_document_properties', true);
+                    } else {
+                        if (event.shiftKey) {
+                            this.rb.deselectObject('0_document_properties');
+                        }
+                    }
+                })
+            );
+        }
         if (this.rb.getProperty('saveCallback') || this.rb.getProperty('localStorageReportKey')) {
             panelLeft.append($(`<button id="rbro_menu_save" class="rbroButton rbroMenuButton" title="${this.rb.getLabel('menuSaveTip')}">
                     <span class="rbroIcon-save"></span><span class="${menuButtonClass}">${this.rb.getLabel('menuSave')}</span></button>`)
@@ -67,12 +110,14 @@ export default class MenuPanel {
                 this.rb.redoCommand();
             })
         );
-        panelLeft.append($(`<button id="rbro_menu_preview" class="rbroButton rbroMenuButton" title="${this.rb.getLabel('menuPreviewTip')}">
-                <span class="rbroIcon-play"></span><span class="${menuButtonClass}">${this.rb.getLabel('menuPreview')}</span></button>`)
-            .click(event => {
-                this.rb.preview();
-            })
-        );
+        if(!this.rb.getProperty('removePreview')){
+            panelLeft.append($(`<button id="rbro_menu_preview" class="rbroButton rbroMenuButton" title="${this.rb.getLabel('menuPreviewTip')}">
+                    <span class="rbroIcon-play"></span><span class="${menuButtonClass}">${this.rb.getLabel('menuPreview')}</span></button>`)
+                .click(event => {
+                    this.rb.preview();
+                })
+            );
+        }
         panel.append(panelLeft);
 
         let panelRight = $('<div class="rbroElementButtonContainer"></div>');

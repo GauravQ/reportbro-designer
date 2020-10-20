@@ -11,6 +11,7 @@ export default class Band extends Container {
         super(id, name, rb);
         this.panelItem = null;
         this.bandType = bandType;
+        this.editable = rb.getProperty('adminMode');
         this.section = section;
         if (!section) {
             if (bandType === Band.bandType.header) {

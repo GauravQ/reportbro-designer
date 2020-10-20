@@ -190,6 +190,11 @@
 .rbroIcon-minus:before {
   content: "\e805";
 }
+.rbroIcon-arrow-left:before {
+  content: "\E935";
+  transform: rotate(-180deg);
+  display: inline-block;
+}
 .rbroIcon-arrow-right:before {
   content: "\e935";
 }

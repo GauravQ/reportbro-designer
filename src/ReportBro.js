@@ -77,6 +77,10 @@ export default class ReportBro {
             reportServerTimeout: 20000,
             reportServerUrl: 'https://www.reportbro.com/report/run',
             reportServerUrlCrossDomain: false,
+            documentSettingsInMenu: false,
+            showMenuToggle: false,
+            removePreview: false,
+            showDisabledToNonAdmin: false,
             theme: ''
         };
         if (properties) {
@@ -85,7 +89,7 @@ export default class ReportBro {
                     this.properties[prop] = properties[prop];
                 }
             }
-            $.extend( this.locale, properties['locale'] || {} );
+            $.extend(this.locale, properties['locale'] || {});
         }
         if (this.properties.additionalFonts.length > 0) {
             this.properties.fonts = this.properties.fonts.concat(this.properties.additionalFonts);
@@ -125,7 +129,7 @@ export default class ReportBro {
         this.clipboardElements = [];
 
         this.mainPanel = new MainPanel(element, this.headerBand, this.contentBand, this.footerBand,
-                this.parameterContainer, this.styleContainer, this);
+            this.parameterContainer, this.styleContainer, this);
         this.menuPanel = new MenuPanel(element, this);
         this.activeDetailPanel = 'none';
         this.detailPanels = {
@@ -148,7 +152,10 @@ export default class ReportBro {
         this.browserDragType = '';
         this.browserDragId = '';
 
-        this.documentProperties.setPanelItem(this.mainPanel.getDocumentPropertiesItem());
+        //if(!this.properties.documentSettingsInMenu){
+            this.documentProperties.setPanelItem(this.mainPanel.getDocumentPropertiesItem());
+        //}
+
         this.initObjectMap();
 
         $(document).keydown(event => {
@@ -165,8 +172,8 @@ export default class ReportBro {
                             for (let selectionId of this.selections) {
                                 let obj = this.getDataObject(selectionId);
                                 if ((obj instanceof DocElement && !(obj instanceof TableTextElement)) ||
-                                        (obj instanceof Parameter && !obj.showOnlyNameType) ||
-                                        (obj instanceof Style)) {
+                                    (obj instanceof Parameter && !obj.showOnlyNameType) ||
+                                    (obj instanceof Style)) {
                                     if (!cleared) {
                                         this.clipboardElements = [];
                                         cleared = true;
@@ -372,8 +379,8 @@ export default class ReportBro {
      */
     addDefaultParameters() {
         for (let parameterData of [
-                { name: 'page_count', type: Parameter.type.number, eval: false, editable: false, showOnlyNameType: true },
-                { name: 'page_number', type: Parameter.type.number, eval: false, editable: false, showOnlyNameType: true }]) {
+            { name: 'page_count', type: Parameter.type.number, eval: false, editable: false, showOnlyNameType: true },
+            { name: 'page_number', type: Parameter.type.number, eval: false, editable: false, showOnlyNameType: true }]) {
             let parameter = new Parameter(this.getUniqueId(), parameterData, this);
             let parentPanel = this.mainPanel.getParametersItem();
             let panelItem = new MainPanelItem(
@@ -407,7 +414,10 @@ export default class ReportBro {
         this.mainPanel.render();
         this.menuPanel.render();
         for (let panelName in this.detailPanels) {
+            // if(panelName == 'documentProperties' && this.properties.documentSettingsInMenu)
+            //     continue;
             this.detailPanels[panelName].render();
+            
         }
         this.detailPanels[this.activeDetailPanel].show();
         this.document.render();
@@ -423,12 +433,12 @@ export default class ReportBro {
             .on('dragstart', event => {
                 // disable dragging per default, otherwise e.g. a text selection can be dragged in Chrome
                 event.preventDefault();
-           })
-           .mousemove(event => {
-               if (!this.mainPanel.processMouseMove(event)) {
-                   this.document.processMouseMove(event);
-               }
-           });
+            })
+            .mousemove(event => {
+                if (!this.mainPanel.processMouseMove(event)) {
+                    this.document.processMouseMove(event);
+                }
+            });
     }
 
     setup() {
@@ -436,7 +446,9 @@ export default class ReportBro {
         this.headerBand.setup();
         this.contentBand.setup();
         this.footerBand.setup();
-        this.documentProperties.setup();
+        //if(!this.properties.documentSettingsInMenu){
+            this.documentProperties.setup();
+        //}
     }
 
     initObjectMap() {
@@ -445,7 +457,9 @@ export default class ReportBro {
         this.addDataObject(this.footerBand);
         this.addDataObject(this.parameterContainer);
         this.addDataObject(this.styleContainer);
-        this.addDataObject(this.documentProperties);
+        //if(!this.properties.documentSettingsInMenu){
+            this.addDataObject(this.documentProperties);
+        //}
     }
 
     /**
@@ -675,7 +689,7 @@ export default class ReportBro {
     }
 
     deleteDocElements() {
-        for (let i=0; i < this.docElements.length; i++) {
+        for (let i = 0; i < this.docElements.length; i++) {
             this.deleteDataObject(this.docElements[i]);
         }
         this.docElements = [];
@@ -740,6 +754,9 @@ export default class ReportBro {
         $('#rbro_menu_save').prop('disabled', !this.modified);
         $('#rbro_menu_undo').prop('disabled', (this.lastCommandIndex < 0));
         $('#rbro_menu_redo').prop('disabled', (this.lastCommandIndex >= (this.commandStack.length - 1)));
+        if (!this.properties.adminMode) {
+            $('#rbo_menu_elements .rbroMenuButton').hide();
+        }
     }
 
     updateMenuActionButtons() {
@@ -808,7 +825,9 @@ export default class ReportBro {
                     $('#rbro_menu_row_actions').hide();
                 }
             } else {
-                $('#rbo_menu_elements .rbroMenuButton').show();
+                if (this.properties.adminMode) {
+                    $('#rbo_menu_elements .rbroMenuButton').show();
+                }
                 $('#rbro_menu_column_actions').hide();
                 $('#rbro_menu_row_actions').hide();
             }
@@ -817,7 +836,7 @@ export default class ReportBro {
 
     debugCommandStack() {
         console.clear();
-        for (let i=0; i < this.commandStack.length; i++) {
+        for (let i = 0; i < this.commandStack.length; i++) {
             if (i > this.lastCommandIndex) {
                 console.log('( ' + i + ' ' + this.commandStack[i].getName() + ' )');
             } else {
@@ -913,18 +932,24 @@ export default class ReportBro {
             }
 
             this.selections.push(id);
-            obj.select();
             if (obj.getPanelItem() !== null) {
                 obj.getPanelItem().openParentItems();
                 obj.getPanelItem().setActive();
             }
-            if (detailPanel !== this.activeDetailPanel) {
-                this.setDetailPanel(detailPanel);
-            }
-            this.detailPanels[this.activeDetailPanel].selectionChanged();
 
-            if (this.properties.selectCallback) {
-                this.properties.selectCallback(obj, true);
+            if ((detailPanel == 'parameter') || (detailPanel != 'parameter' && ( this.properties.adminMode || this.properties.showDisabledToNonAdmin))) {
+                obj.select();
+                
+                if (detailPanel !== this.activeDetailPanel) {
+                    this.setDetailPanel(detailPanel);
+                }
+                this.detailPanels[this.activeDetailPanel].selectionChanged();
+
+                if (this.properties.selectCallback) {
+                    this.properties.selectCallback(obj, true);
+                }
+            }else{
+                obj.select(true);
             }
         }
 
@@ -980,7 +1005,7 @@ export default class ReportBro {
         for (let i = 0; i < this.containers.length; i++) {
             let container = this.containers[i];
             if (container.getLevel() > bestMatchLevel && container.isElementAllowed(elementType) &&
-                    container.isInside(posX, posY)) {
+                container.isInside(posX, posY)) {
                 bestMatch = container;
                 bestMatchLevel = container.getLevel();
             }
@@ -1071,7 +1096,7 @@ export default class ReportBro {
             }
         }
         let center = minX + ((maxX - minX) / 2);
-        let vcenter  = minY + ((maxY - minY) / 2);
+        let vcenter = minY + ((maxY - minY) / 2);
         if (elementCount > 1) {
             let cmdGroup = new CommandGroupCmd('Align elements', this);
             for (let selectionId of this.selections) {
@@ -1083,41 +1108,41 @@ export default class ReportBro {
                                 obj.getId(), 'x', '' + minX, SetValueCmd.type.text, this);
                             cmdGroup.addCommand(cmd);
                         }
-                        break;
+                            break;
                         case Style.alignment.center: {
                             let cmd = new SetValueCmd(
                                 obj.getId(), 'x', '' + (center - (obj.getValue('widthVal') / 2)),
                                 SetValueCmd.type.text, this);
                             cmdGroup.addCommand(cmd);
                         }
-                        break;
+                            break;
                         case Style.alignment.right: {
                             let cmd = new SetValueCmd(
                                 obj.getId(), 'x', '' + (maxX - obj.getValue('widthVal')),
                                 SetValueCmd.type.text, this);
                             cmdGroup.addCommand(cmd);
                         }
-                        break;
+                            break;
                         case Style.alignment.top: {
                             let cmd = new SetValueCmd(
                                 obj.getId(), 'y', '' + minY, SetValueCmd.type.text, this);
                             cmdGroup.addCommand(cmd);
                         }
-                        break;
+                            break;
                         case Style.alignment.middle: {
                             let cmd = new SetValueCmd(
                                 obj.getId(), 'y', '' + (vcenter - (obj.getValue('heightVal') / 2)),
                                 SetValueCmd.type.text, this);
                             cmdGroup.addCommand(cmd);
                         }
-                        break;
+                            break;
                         case Style.alignment.bottom: {
                             let cmd = new SetValueCmd(
                                 obj.getId(), 'y', '' + (maxY - obj.getValue('heightVal')),
                                 SetValueCmd.type.text, this);
                             cmdGroup.addCommand(cmd);
                         }
-                        break;
+                            break;
                     }
                 }
             }
@@ -1183,7 +1208,7 @@ export default class ReportBro {
                     }
                     ret[parameter.getName()] = testDataRows;
                 } else if (type === Parameter.type.string || type === Parameter.type.number ||
-                           type === Parameter.type.boolean || type === Parameter.type.date) {
+                    type === Parameter.type.boolean || type === Parameter.type.date) {
                     ret[parameter.getName()] = parameter.getValue('testData');
                 }
             }
@@ -1235,7 +1260,7 @@ export default class ReportBro {
             type: "PUT", contentType: "application/json",
             timeout: this.properties.reportServerTimeout,
             crossDomain: this.properties.reportServerUrlCrossDomain,
-            success: function(data) {
+            success: function (data) {
                 self.hideLoading();
                 let pdfPrefix = 'data:application/pdf';
                 if (data.substr(0, 4) === 'key:') {
@@ -1253,7 +1278,7 @@ export default class ReportBro {
                     }
                 }
             },
-            error: function(jqXHR, textStatus, errorThrown) {
+            error: function (jqXHR, textStatus, errorThrown) {
                 self.hideLoading();
                 if (textStatus === "timeout") {
                     alert('preview failed (timeout)');
@@ -1340,6 +1365,24 @@ export default class ReportBro {
         this.updateMenuButtons();
     }
 
+    
+    readTextFile(fileUrl) {
+        var xmlHttp = new XMLHttpRequest();
+        xmlHttp.open("GET", fileUrl, false);
+        xmlHttp.send(null);
+        return xmlHttp.responseText;
+    }
+
+    /**
+     * Loads report object into ReportBro Designer.
+     * @param {Object} report - the report object.
+     */
+    loadFromURL(fileUrl) {
+        var customReport = this.readTextFile(fileUrl);
+        customReport = JSON.parse(customReport);
+        this.load(customReport);
+    }
+
     /**
      * Loads report object into ReportBro Designer.
      * @param {Object} report - the report object.
@@ -1377,7 +1420,7 @@ export default class ReportBro {
             for (let docElementData of report.docElements) {
                 if (docElementData.elementType === DocElement.type.table) {
                     let width = 0;
-                    for (let i=0; i < docElementData.headerData.columnData.length; i++) {
+                    for (let i = 0; i < docElementData.headerData.columnData.length; i++) {
                         width += docElementData.headerData.columnData[i].width;
                     }
                     docElementData.width = width;
@@ -1597,7 +1640,7 @@ export default class ReportBro {
     createStyle(styleData) {
         let style = new Style(styleData.id, styleData, this);
         let parentPanel = this.mainPanel.getStylesItem();
-        let panelItem = new MainPanelItem('style', parentPanel, style, { draggable: true }, this);
+        let panelItem = new MainPanelItem('style', parentPanel, style, { draggable: true, showAdd: style.getValue('editable'), showDelete: style.getValue('editable') }, this);
         style.setPanelItem(panelItem);
         parentPanel.appendChild(panelItem);
         this.addStyle(style);
@@ -1613,7 +1656,7 @@ export default class ReportBro {
      * @param {DocElement} element - doc element to delete.
      */
     deleteDocElement(element) {
-        for (let i=0; i < this.docElements.length; i++) {
+        for (let i = 0; i < this.docElements.length; i++) {
             if (this.docElements[i].getId() === element.getId()) {
                 this.docElements.splice(i, 1);
                 this.deleteDataObject(element);

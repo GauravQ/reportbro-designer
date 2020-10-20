@@ -16,6 +16,7 @@ export default class TextElement extends DocElement {
         this.styleId = '';
         this.bold = false;
         this.italic = false;
+        this.userEditable = false;
         this.underline = false;
         this.strikethrough = false;
         this.horizontalAlignment = Style.alignment.left;
@@ -31,6 +32,7 @@ export default class TextElement extends DocElement {
         this.borderLeft = false;
         this.borderTop = false;
         this.borderRight = false;
+        this.userEditable = false;
         this.borderBottom = false;
         this.paddingLeft = '2';
         this.paddingTop = '2';
@@ -127,7 +129,7 @@ export default class TextElement extends DocElement {
      * @returns {String[]}
      */
     getProperties() {
-        return ['x', 'y', 'width', 'height', 'content', 'eval',
+        return ['x', 'y', 'width', 'height', 'content', 'userEditable', 'eval',
             'styleId', 'bold', 'italic', 'underline', 'strikethrough',
             'horizontalAlignment', 'verticalAlignment', 'textColor', 'backgroundColor', 'font', 'fontSize',
             'lineSpacing', 'borderColor', 'borderWidth',

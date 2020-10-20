@@ -93,6 +93,10 @@ export default class DocElementPanel extends PanelBase {
                 'type': SetValueCmd.type.checkbox,
                 'fieldId': 'display_value'
             },
+            'userEditable': {
+                'type': SetValueCmd.type.checkbox,
+                'fieldId': 'user_editable'
+            },
             'source': {
                 'type': SetValueCmd.type.text,
                 'fieldId': 'source'
@@ -722,6 +726,32 @@ export default class DocElementPanel extends PanelBase {
         elDiv.append(elFormField);
         panel.append(elDiv);
 
+        
+        if (this.rb.getProperty('adminMode') || this.rb.getProperty('showDisabledToNonAdmin')) {
+            elDiv = $('<div id="rbro_doc_element_user_editable_row" class="rbroFormRow"></div>');
+            elDiv.append(`<label for="rbro_doc_element_user_editable">${this.rb.getLabel('docElementUserEditable')}:</label>`);
+            elFormField = $('<div class="rbroFormField"></div>');
+            let elUserEditable = $('<input id="rbro_doc_element_user_editable" type="checkbox">')
+                .change(event => {
+                    let userEditableChecked = elUserEditable.is(":checked");
+                    let cmdGroup = new CommandGroupCmd('Set value', this.rb);
+                    let selectedObjects = this.rb.getSelectedObjects();
+                    for (let i=selectedObjects.length - 1; i >= 0; i--) {
+                        let obj = selectedObjects[i];
+                        cmdGroup.addSelection(obj.getId());
+                        cmdGroup.addCommand(new SetValueCmd(
+                            obj.getId(),'userEditable', userEditableChecked,
+                            SetValueCmd.type.checkbox, this.rb));
+                    }
+                    if (!cmdGroup.isEmpty()) {
+                        this.rb.executeCommand(cmdGroup);
+                    }
+                });
+            elFormField.append(elUserEditable);
+            elDiv.append(elFormField);
+            panel.append(elDiv);
+        }
+
         elDiv = $('<div id="rbro_doc_element_source_row" class="rbroFormRow"></div>');
         elDiv.append(`<label for="rbro_doc_element_source">${this.rb.getLabel('docElementSource')}:</label>`);
         elFormField = $('<div class="rbroFormField rbroSplit rbroSelector"></div>');
@@ -866,7 +896,7 @@ export default class DocElementPanel extends PanelBase {
         panel.append(elDiv);
 
         elDiv = $('<div id="rbro_doc_element_size_row" class="rbroFormRow rbroHidden"></div>');
-        elDiv.append(`<label id="rbro_doc_element_size_label" for="rbro_doc_element_size">
+        elDiv.append(`<label id="rbro_doc_element_size_label" for="rbro_doc_element_width">
                       ${this.rb.getLabel('docElementSize')}:</label>`);
         elFormField = $('<div class="rbroFormField rbroSplit"></div>');
         let elWidth = $('<input id="rbro_doc_element_width" type="number">')
@@ -1783,6 +1813,7 @@ export default class DocElementPanel extends PanelBase {
      */
     updateDisplay(field) {
         let selectedObjects = this.rb.getSelectedObjects();
+        let editable = this.rb.getProperty('adminMode') || !this.rb.getProperty('showDisabledToNonAdmin');
 
         let sectionPropertyCount = {};
         let sharedProperties = {};
@@ -1908,6 +1939,8 @@ export default class DocElementPanel extends PanelBase {
                             $('#' + propertyDescriptor['rowId']).addClass('rbroHidden');
                         }
                     }
+
+                    this.setDisable(propertyDescriptor, !editable);
                 }
             }
 
@@ -1922,6 +1955,39 @@ export default class DocElementPanel extends PanelBase {
         }
 
         DocElementPanel.updateAutosizeInputs(field);
+    }
+
+    
+    setDisable(propertyDescriptor, disabled = false) {
+        let propertyId = `#rbro_doc_element_${propertyDescriptor['fieldId']}`;    
+        let labelId = `rbro_doc_element_${propertyDescriptor['fieldId']}`;   
+        
+
+        if(propertyDescriptor['type'] === SetValueCmd.type.buttonGroup) {
+            $(propertyId).find(`button`).prop('disabled', disabled);
+        }else if(propertyDescriptor['type'] === SetValueCmd.type.color && disabled) {
+            $(propertyId).parent().css('pointer-events','none');
+        }else{   
+            $(propertyId).prop('disabled', disabled);
+        }
+		
+		if(	labelId == 'rbro_doc_element_data_source'
+			|| labelId == 'rbro_doc_element_content'
+			|| labelId == 'rbro_doc_element_source'
+			|| labelId == 'rbro_doc_element_group_expression'
+			|| labelId == 'rbro_doc_element_print_if'
+			|| labelId == 'rbro_doc_element_pattern'
+			|| labelId == 'rbro_doc_element_link'
+			|| labelId == 'rbro_doc_element_cs_condition'
+		){			
+			$(propertyId).parent().find('.rbroIcon-select').css('pointer-events','none');
+		}
+
+        if(disabled){
+            $('label[for='+ labelId  +']').addClass('rbroDisabled');
+        }else{
+            $('label[for='+ labelId  +']').removeClass('rbroDisabled');
+        }
     }
 
     static updateAutosizeInputs(field) {

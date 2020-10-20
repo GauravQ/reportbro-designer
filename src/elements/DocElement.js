@@ -86,6 +86,7 @@ export default class DocElement {
      * allow selection on double click.
      */
     registerContainerEventHandlers() {
+        var viewonly = !this.rb.properties.adminMode;
         this.el
             .dblclick(event => {
                 if (!this.rb.isSelectedObject(this.id)) {
@@ -93,22 +94,24 @@ export default class DocElement {
                     event.stopPropagation();
                 }
             })
-            .mousedown(event => {
+            .mousedown(event => {                
                 if (event.shiftKey) {
                     this.rb.deselectObject(this.id);
                 } else {
                     if (this.rb.isSelectedObject(this.id)) {
-                        this.rb.getDocument().startDrag(event.originalEvent.pageX, event.originalEvent.pageY,
-                            this.id, this.containerId, this.linkedContainerId,
-                            this.getElementType(), DocElement.dragType.element);
+                        if(!viewonly){
+                            this.rb.getDocument().startDrag(event.originalEvent.pageX, event.originalEvent.pageY,
+                                this.id, this.containerId, this.linkedContainerId,
+                                this.getElementType(), DocElement.dragType.element);
+                        }
                     } else {
                         this.rb.deselectAll(true);
                     }
-                }
+                }                
                 event.stopPropagation();
             })
             .on('touchstart', event => {
-                if (this.rb.isSelectedObject(this.id)) {
+                if (this.rb.isSelectedObject(this.id) && !viewonly) {
                     let absPos = getEventAbsPos(event);
                     this.rb.getDocument().startDrag(absPos.x, absPos.y,
                         this.id, this.containerId, this.linkedContainerId,
@@ -117,10 +120,14 @@ export default class DocElement {
                 event.preventDefault();
             })
             .on('touchmove', event => {
-                this.rb.getDocument().processDrag(event);
+                if(!viewonly){
+                    this.rb.getDocument().processDrag(event);
+                }
             })
             .on('touchend', event => {
-                this.rb.getDocument().stopDrag();
+                if(!viewonly){
+                    this.rb.getDocument().stopDrag();
+                }
             });
     }
 
@@ -128,17 +135,18 @@ export default class DocElement {
      * Register event handlers so element can be selected, dragged and resized.
      */
     registerEventHandlers() {
+        var viewonly = !this.rb.properties.adminMode;
         this.el
             .dblclick(event => {
-                this.handleDoubleClick(event);
+                this.handleDoubleClick(event, viewonly);
             })
             .mousedown(event => {
-                this.handleClick(event, false);
+                this.handleClick(event, false, viewonly);
             })
-            .on('touchstart', event => {
+            .on('touchstart', event => {                
                 if (!this.rb.isSelectedObject(this.id)) {
-                    this.handleClick(event, true);
-                } else {
+                    this.handleClick(event, true, viewonly);
+                } else if(!viewonly) {
                     let absPos = getEventAbsPos(event);
                     this.rb.getDocument().startDrag(absPos.x, absPos.y,
                         this.id, this.containerId, this.linkedContainerId,
@@ -147,19 +155,19 @@ export default class DocElement {
                 }
             })
             .on('touchmove', event => {
-                if (this.rb.isSelectedObject(this.id)) {
+                if (this.rb.isSelectedObject(this.id) && !viewonly) {
                     this.rb.getDocument().processDrag(event);
                 }
             })
             .on('touchend', event => {
-                if (this.rb.isSelectedObject(this.id)) {
+                if (this.rb.isSelectedObject(this.id) && !viewonly) {
                     this.rb.getDocument().stopDrag();
                 }
             });
     }
 
-    handleDoubleClick(event) {
-        this.handleClick(event, true);
+    handleDoubleClick(event, viewonly = false) {
+        this.handleClick(event, true, viewonly);
     }
 
     /**
@@ -169,7 +177,7 @@ export default class DocElement {
      * was not selected before. Otherwise the element will only be selected if it's container is
      * not selected (e.g. the frame container when this element is inside a frame).
      */
-    handleClick(event, ignoreSelectedContainer) {
+    handleClick(event, ignoreSelectedContainer, viewonly = false) {
         if (!this.rb.isSelectedObject(this.id)) {
             if (ignoreSelectedContainer || !this.isContainerSelected()) {
                 let allowSelection = true;
@@ -192,7 +200,7 @@ export default class DocElement {
         } else {
             if (event.shiftKey) {
                 this.rb.deselectObject(this.id);
-            } else if (!ignoreSelectedContainer) {
+            } else if (!ignoreSelectedContainer && !viewonly) {
                 this.rb.getDocument().startDrag(event.originalEvent.pageX, event.originalEvent.pageY,
                     this.id, this.containerId, this.linkedContainerId,
                     this.getElementType(), DocElement.dragType.element);
@@ -644,14 +652,16 @@ export default class DocElement {
         }
     }
 
-    select() {
+    select(viewonly = false) {
         if (this.el !== null) {
             let elSizerContainer = this.getSizerContainerElement();
             let sizers = this.getSizers();
             for (let sizer of sizers) {
                 let sizerVal = sizer;
+                
                 let elSizer = $(`<div class="rbroSizer rbroSizer${sizer}"></div>`)
-                    .mousedown(event => {
+                if(!viewonly){
+                    elSizer.mousedown(event => {
                         this.rb.getDocument().startDrag(event.pageX, event.pageY,
                             this.id, this.containerId, this.linkedContainerId,
                             this.getElementType(), DocElement.dragType['sizer' + sizerVal]);
@@ -673,7 +683,7 @@ export default class DocElement {
                     .on('touchend', event => {
                         this.rb.getDocument().stopDrag();
                     });
-
+                }
                 elSizerContainer.append(elSizer);
             }
             this.el.addClass('rbroSelected');

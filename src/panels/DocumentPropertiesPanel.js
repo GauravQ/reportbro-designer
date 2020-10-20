@@ -471,6 +471,7 @@ export default class DocumentPropertiesPanel extends PanelBase {
      */
     updateDisplay(field) {
         let selectedObject = this.rb.getSelectedObject();
+        let editable = this.rb.getProperty('adminMode') || !this.rb.getProperty('showDisabledToNonAdmin');
 
         if (selectedObject !== null && selectedObject instanceof DocumentProperties) {
             for (let property in this.propertyDescriptors) {
@@ -478,6 +479,7 @@ export default class DocumentPropertiesPanel extends PanelBase {
                     let propertyDescriptor = this.propertyDescriptors[property];
                     let value = selectedObject.getValue(property);
                     super.setValue(propertyDescriptor, value, false);
+                    super.setDisable(propertyDescriptor, !editable);
                 }
             }
 

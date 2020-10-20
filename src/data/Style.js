@@ -38,6 +38,7 @@ export default class Style {
         this.paddingTop = '';
         this.paddingRight = '';
         this.paddingBottom = '';
+        this.editable = rb.getProperty('adminMode');
 
         this.borderWidthVal = 0;
 
