@@ -1402,7 +1402,7 @@ export default class StylePanel extends PanelBase {
      */
     updateDisplay(field) {
         let selectedObject = this.rb.getSelectedObject();
-        let editable = this.rb.getProperty('adminMode') || !this.rb.getProperty('showDisabledToNonAdmin');
+        let editable = this.rb.getProperty('adminMode');// || !this.rb.getProperty('showDisabledToNonAdmin');
 
         if (selectedObject !== null && selectedObject instanceof Style) {
             for (let property in this.propertyDescriptors) {

@@ -556,7 +556,30 @@ export default class DocElementPanel extends PanelBase {
             }
         };
     }
+    // showOnlyEditable(){
 
+    //     let selectedObjects = this.rb.getSelectedObjects();
+    //     if(selectedObjects){            
+    //         let sharedProperties = {};
+    //         for (let obj of selectedObjects) {
+    //             let properties = obj.getProperties();
+    //             for (let property of properties) {
+    //                 if (property in sharedProperties) {
+    //                     sharedProperties[property] += 1;
+    //                 } else {
+    //                     sharedProperties[property] = 1;
+    //                 }
+    //             }
+    //         }
+            
+    //         for (let obj of selectedObjects) {
+    //             //rbro_doc_element_label_row
+    //             console.log(obj);
+    //         }
+
+    //     }
+
+    // }
     render() {
         let elDiv, elFormField, elParameterButton;
         let panel = $('<div id="rbro_doc_element_panel" class="rbroHidden"></div>');
@@ -727,7 +750,7 @@ export default class DocElementPanel extends PanelBase {
         panel.append(elDiv);
 
         
-        if (this.rb.getProperty('adminMode') || this.rb.getProperty('showDisabledToNonAdmin')) {
+        if (this.rb.getProperty('adminMode') ) {//|| this.rb.getProperty('showDisabledToNonAdmin')
             elDiv = $('<div id="rbro_doc_element_user_editable_row" class="rbroFormRow"></div>');
             elDiv.append(`<label for="rbro_doc_element_user_editable">${this.rb.getLabel('docElementUserEditable')}:</label>`);
             elFormField = $('<div class="rbroFormField"></div>');
@@ -1813,7 +1836,8 @@ export default class DocElementPanel extends PanelBase {
      */
     updateDisplay(field) {
         let selectedObjects = this.rb.getSelectedObjects();
-        let editable = this.rb.getProperty('adminMode') || !this.rb.getProperty('showDisabledToNonAdmin');
+        let adminMode = this.rb.getProperty('adminMode');
+        let editable = adminMode;
 
         let sectionPropertyCount = {};
         let sharedProperties = {};
@@ -1907,10 +1931,14 @@ export default class DocElementPanel extends PanelBase {
             // only update labels, visible rows and sections if selection was changed (no specific field update)
 
             // sharedProperties now only contains properties shared by all objects
-
             for (let property in this.propertyDescriptors) {
                 if (this.propertyDescriptors.hasOwnProperty(property)) {
                     let propertyDescriptor = this.propertyDescriptors[property];
+                    let propertyEditable = editable;
+                    if(this.propertyDescriptors['userEditable'] && ['content','source','dataSource'].includes(propertyDescriptor.fieldId) && !propertyEditable)
+                    {
+                        propertyEditable = selectedObjects[0].userEditable;
+                    }
                     if ('rowId' in propertyDescriptor && 'rowProperties' in propertyDescriptor) {
                         let shownPropertyCount = 0;
                         for (let rowProperty of propertyDescriptor['rowProperties']) {
@@ -1940,7 +1968,7 @@ export default class DocElementPanel extends PanelBase {
                         }
                     }
 
-                    this.setDisable(propertyDescriptor, !editable);
+                    this.setDisable(propertyDescriptor, !propertyEditable);
                 }
             }
 
@@ -1971,6 +1999,9 @@ export default class DocElementPanel extends PanelBase {
             $(propertyId).prop('disabled', disabled);
         }
 		
+
+        if(disabled)
+        {
 		if(	labelId == 'rbro_doc_element_data_source'
 			|| labelId == 'rbro_doc_element_content'
 			|| labelId == 'rbro_doc_element_source'
@@ -1978,12 +2009,11 @@ export default class DocElementPanel extends PanelBase {
 			|| labelId == 'rbro_doc_element_print_if'
 			|| labelId == 'rbro_doc_element_pattern'
 			|| labelId == 'rbro_doc_element_link'
-			|| labelId == 'rbro_doc_element_cs_condition'
-		){			
+                || labelId == 'rbro_doc_element_cs_condition' )
+            {			
 			$(propertyId).parent().find('.rbroIcon-select').css('pointer-events','none');
 		}
 
-        if(disabled){
             $('label[for='+ labelId  +']').addClass('rbroDisabled');
         }else{
             $('label[for='+ labelId  +']').removeClass('rbroDisabled');

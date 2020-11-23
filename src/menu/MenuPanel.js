@@ -20,8 +20,10 @@ export default class MenuPanel {
 
             $('.rbroDocumentPanel').addClass('rbroDocumentPanelLeft');
             $('.rbroDetailPanel').addClass('rbroDetailPanelLeft');
+            $('.rbroToolButtonContainer').addClass('rbroToolButtonContainerLeft');
             $('.rbroMainPanel').hide();
             $('.rbroMainPanelSizer').hide();
+            $('.rbroLogo').hide();
 
 
         } else {
@@ -29,10 +31,45 @@ export default class MenuPanel {
 
             $('.rbroDocumentPanel').removeClass('rbroDocumentPanelLeft');
             $('.rbroDetailPanel').removeClass('rbroDetailPanelLeft');
+            $('.rbroToolButtonContainer').removeClass('rbroToolButtonContainerLeft');
             $('.rbroMainPanel').show();
             $('.rbroMainPanelSizer').show();
+            $('.rbroLogo').show();
         }
     }
+    exitFullscreen(){
+        if(!document.fullscreen && !document.mozFullScreen && !document.webkitIsFullScreen){
+            $('#rbro_menu_designer_fullscreen').removeClass('rbroButtonActive');
+            $('#reportbro').removeClass('reportbro-fullscreen');
+        }
+    }
+
+    toggleFullscreen(){
+
+        if($('#reportbro')[0].classList.contains('reportbro-fullscreen')){
+            $('#rbro_menu_designer_fullscreen').removeClass('rbroButtonActive');
+            $('#reportbro').removeClass('reportbro-fullscreen');
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            } else if (document.webkitExitFullscreen) { /* Safari */
+                document.webkitExitFullscreen();
+            } else if (document.msExitFullscreen) { /* IE11 */
+                document.msExitFullscreen();
+            }
+        }else{
+            $('#rbro_menu_designer_fullscreen').addClass('rbroButtonActive');
+            $('#reportbro').addClass('reportbro-fullscreen');
+            var rbro = document.getElementById('reportbro');
+            if (rbro.requestFullscreen) {
+                rbro.requestFullscreen();
+            } else if (rbro.webkitRequestFullscreen) { /* Safari */
+                rbro.webkitRequestFullscreen();
+            } else if (rbro.msRequestFullscreen) { /* IE11 */
+                rbro.msRequestFullscreen();
+            }
+        }
+    }
+
 
     render() {
         let menuShowButtonLabels = this.rb.getProperty('menuShowButtonLabels');
@@ -428,7 +465,24 @@ export default class MenuPanel {
                 this.rb.getDocument().toggleGrid();
             });
         elActionsDiv.append(elMenuToggleGrid);
+
+        if (this.rb.getProperty('showFullscreenIcon')) {
+            let elMenuToggleFullscreen = $(`<button id="rbro_menu_designer_fullscreen"
+                class="rbroButton rbroFullscreenButton rbroActionButton rbroIcon-frame" type="button"
+                title="${this.rb.getLabel('menuToggleFullscreen')}"></button>`)
+                    .click(event => {
+                        this.toggleFullscreen();
+                    })
+            elActionsDiv.append(elMenuToggleFullscreen);
+            $('#reportbro').on("fullscreenchange", this.exitFullscreen);
+            $('#reportbro').on("mozfullscreenchange", this.exitFullscreen);
+            $('#reportbro').on("webkitfullscreenchange", this.exitFullscreen);
+        }
+        
         panelRight.append(elActionsDiv);
         panel.append(panelRight);
+        if (this.rb.getProperty('showMenuToggle')) {
+            this.toggleMenuPanel();
+        }
     }
 }

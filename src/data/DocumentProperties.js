@@ -6,7 +6,7 @@ import * as utils from '../utils';
  * @class
  */
 export default class DocumentProperties {
-    constructor(rb) {
+    constructor(rb, removeInitialHeaderFooter = false) {
         this.rb = rb;
         this.id = '0_document_properties';
         this.panelItem = null;
@@ -33,6 +33,10 @@ export default class DocumentProperties {
         this.footer = true;
         this.footerSize = '80';
         this.footerDisplay = DocumentProperties.display.always;
+        if(removeInitialHeaderFooter){
+            this.header = false;
+            this.footer = false;
+        }
 
         this.headerSizeVal = this.header ? utils.convertInputToNumber(this.headerSize) : 0;
         this.footerSizeVal = this.footer ? utils.convertInputToNumber(this.footerSize) : 0;

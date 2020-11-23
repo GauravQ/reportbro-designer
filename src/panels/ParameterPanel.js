@@ -156,7 +156,7 @@ export default class ParameterPanel extends PanelBase {
 
         }
         
-        if (this.rb.getProperty('adminMode') || this.rb.getProperty('showDisabledToNonAdmin')) {            
+        if (this.rb.getProperty('adminMode')) {   //|| this.rb.getProperty('showDisabledToNonAdmin')         
             elDiv = $('<div class="rbroFormRow" id="rbro_parameter_user_editable_row"></div>');
             elDiv.append(`<label for="rbro_parameter_user_editable">${this.rb.getLabel('parameterUserEditable')}:</label>`);
             elFormField = $('<div class="rbroFormField"></div>');

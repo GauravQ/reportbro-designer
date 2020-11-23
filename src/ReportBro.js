@@ -81,6 +81,8 @@ export default class ReportBro {
             showMenuToggle: false,
             removePreview: false,
             showDisabledToNonAdmin: false,
+            showFullscreenIcon: false,
+            removeInitialHeaderFooter: false,
             theme: ''
         };
         if (properties) {
@@ -125,7 +127,7 @@ export default class ReportBro {
         this.footerBand = new Band(Band.bandType.footer, false, '', '', this);
         this.parameterContainer = new Container('0_parameters', this.getLabel('parameters'), this);
         this.styleContainer = new Container('0_styles', this.getLabel('styles'), this);
-        this.documentProperties = new DocumentProperties(this);
+        this.documentProperties = new DocumentProperties(this, this.properties.removeInitialHeaderFooter);
         this.clipboardElements = [];
 
         this.mainPanel = new MainPanel(element, this.headerBand, this.contentBand, this.footerBand,
@@ -397,11 +399,11 @@ export default class ReportBro {
         if (this.getProperty('menuSidebar')) {
             this.element.addClass('rbroMenuPanelSidebar');
         }
-        if (this.getProperty('theme') === 'classic') {
-            $('body').addClass('rbroClassicTheme');
-        } else {
-            $('body').addClass('rbroDefaultTheme');
-        }
+        // if (this.getProperty('theme') === 'classic') {
+        //     $('body').addClass('rbroClassicTheme');
+        // } else {
+        //     $('body').addClass('rbroDefaultTheme');
+        // }
         this.element.append('<div class="rbroLogo"></div>');
         this.element.append('<div class="rbroMenuPanel" id="rbro_menu_panel"></div>');
         this.element.append(
@@ -416,8 +418,7 @@ export default class ReportBro {
         for (let panelName in this.detailPanels) {
             // if(panelName == 'documentProperties' && this.properties.documentSettingsInMenu)
             //     continue;
-            this.detailPanels[panelName].render();
-            
+            this.detailPanels[panelName].render();            
         }
         this.detailPanels[this.activeDetailPanel].show();
         this.document.render();
@@ -937,7 +938,7 @@ export default class ReportBro {
                 obj.getPanelItem().setActive();
             }
 
-            if ((detailPanel == 'parameter') || (detailPanel != 'parameter' && ( this.properties.adminMode || this.properties.showDisabledToNonAdmin))) {
+            if ((detailPanel == 'parameter') || (detailPanel != 'parameter' && ( this.properties.adminMode || this.properties.showDisabledToNonAdmin || obj.userEditable ))) {
                 obj.select();
                 
                 if (detailPanel !== this.activeDetailPanel) {
@@ -1379,8 +1380,17 @@ export default class ReportBro {
      */
     loadFromURL(fileUrl) {
         var customReport = this.readTextFile(fileUrl);
-        customReport = JSON.parse(customReport);
-        this.load(customReport);
+        if(customReport){
+            try {
+                while(typeof customReport == 'string'){
+                    customReport = JSON.parse(customReport);
+                }
+                this.load(customReport);
+            }
+            catch(err) {
+                console.log("Could not load from URL - "+ fileUrl);
+            }
+        }
     }
 
     /**

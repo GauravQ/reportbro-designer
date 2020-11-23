@@ -1314,3 +1314,6 @@ button.rbroMenuButton[disabled], button.rbroMenuButton[disabled]:hover,
 .rbroDetailPanelLeft {
     left: 0px !important;
 }
+.rbroToolButtonContainerLeft{
+    left: 0px !important;
+}

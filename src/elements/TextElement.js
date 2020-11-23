@@ -16,7 +16,6 @@ export default class TextElement extends DocElement {
         this.styleId = '';
         this.bold = false;
         this.italic = false;
-        this.userEditable = false;
         this.underline = false;
         this.strikethrough = false;
         this.horizontalAlignment = Style.alignment.left;
